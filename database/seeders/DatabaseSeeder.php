@@ -15,11 +15,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Buat akun Super Admin
+        $superAdmin = User::create([
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('password'), // password default: password
+            'role' => User::ROLE_SUPER_ADMIN,
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        \App\Models\profile::create([
+            'user_id' => $superAdmin->id,
+            'Nik' => '0000000000000001',
+            'name' => 'Super Administrator',
+            'alamat' => 'bukit_raya',
+            'no_telp' => '081111111111',
+        ]);
+
+        // 2. Buat akun Konsumen (User biasa)
+        $konsumen = User::create([
+            'email' => 'konsumen@example.com',
+            'password' => bcrypt('password'), // password default: password
+            'role' => User::ROLE_KONSUMEN,
+        ]);
+
+        \App\Models\profile::create([
+            'user_id' => $konsumen->id,
+            'Nik' => '1111111111111111',
+            'name' => 'Budi Konsumen',
+            'alamat' => 'bukit_raya',
+            'no_telp' => '081234567890',
         ]);
     }
 }

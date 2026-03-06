@@ -1,0 +1,49 @@
+﻿
+  Dropping all tables  307.63ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table  52.01ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table  459.40ms DONE
+  0001_01_01_000001_create_cache_table  236.61ms DONE
+  0001_01_01_000002_create_jobs_table  210.46ms DONE
+  2026_01_26_033245_create_pengaduans_table  45.49ms DONE
+  2026_01_26_050051_drop_judul  25.83ms DONE
+  2026_01_27_005918_nambah_kolom_user  160.43ms DONE
+  2026_01_27_032937_nambah_role  32.90ms DONE
+  2026_01_27_040159_nambah_table_penugasan  353.05ms DONE
+  2026_01_27_050033_create_progres__penugasans_table  114.63ms DONE
+  2026_01_27_050748_create_lps_table  31.14ms DONE
+  2026_01_29_011227_create_komentars_table  290.80ms DONE
+  2026_01_29_064149_nambah_kolom_foto_pengaduan  42.13ms DONE
+  2026_02_02_013626_pengubahan_enum_pengaduan  245.09ms DONE
+  2026_02_06_020234_create_profiles_table  414.12ms DONE
+
+
+   INFO  Seeding database.  
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'project-kp.profiles' doesn't exist (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: project-kp, SQL: insert into `profiles` (`user_id`, `Nik`, `name`, `alamat`, `no_telp`, `updated_at`, `created_at`) values (1, 0000000000000001, Super Administrator, bukit_raya, 081111111111, 2026-03-04 05:10:15, 2026-03-04 05:10:15))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+    834Γûò             $exceptionType = $this->isUniqueConstraintError($e)
+    835Γûò                 ? UniqueConstraintViolationException::class
+    836Γûò                 : QueryException::class;
+    837Γûò 
+  Γ₧£ 838Γûò             throw new $exceptionType(
+    839Γûò                 $this->getNameWithReadWriteType(),
+    840Γûò                 $query,
+    841Γûò                 $this->prepareBindings($bindings),
+    842Γûò                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:47
+      PDOException::("SQLSTATE[42S02]: Base table or view not found: 1146 Table 'project-kp.profiles' doesn't exist")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:47
+      PDO::prepare("insert into `profiles` (`user_id`, `Nik`, `name`, `alamat`, `no_telp`, `updated_at`, `created_at`) values (?, ?, ?, ?, ?, ?, ?)")
+

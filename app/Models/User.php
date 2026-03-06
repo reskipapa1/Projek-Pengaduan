@@ -6,11 +6,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    // Definisikan Konstanta Role di sini
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+    public const ROLE_KONSUMEN = 'konsumen';
+    public const ROLE_KEPALA_BAGIAN = 'kepala_bagian';
+    public const ROLE_ADMIN_PENANGANAN = 'admin_penanganan';
+
+    /**
+     * Dapatkan daftar role yang valid
+     */
+    public static function getValidRoles(): array
+    {
+        return [
+            self::ROLE_SUPER_ADMIN,
+            self::ROLE_KONSUMEN,
+            self::ROLE_KEPALA_BAGIAN,
+            self::ROLE_ADMIN_PENANGANAN,
+        ];
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +38,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -44,5 +64,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(profile::class);
     }
 }

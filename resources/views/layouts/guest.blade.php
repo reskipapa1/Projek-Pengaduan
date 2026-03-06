@@ -11,20 +11,43 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
+        <!-- Vite -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+
+   <body class="font-sans antialiased bg-gradient-to-br from-green-500 to-emerald-700">
+            <div class="mt-7 flex justify-center">
+    <a href="/">
+        <x-application-logo class="w-20 h-20 text-blue-600" />
+    </a>
+</div>
+    <div class="min-h-screen flex items-center justify-center p-6">
+
+        <div class="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden flex">
+
+            <!-- LEFT SIDE -->
+            <div class="hidden md:flex w-1/2 bg-gradient-to-br from-green-500 to-emerald-600 items-center justify-center p-10 relative">
+
+                <!-- Overlay Shape -->
+                <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+
+                <img src="{{ asset('bg-login.jpeg') }}"
+                     class="relative z-10 max-h-[400px] object-contain">
+
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <!-- RIGHT SIDE -->
+            <div class="w-full md:w-1/2 p-12 flex items-center justify-center bg-gray-50">
+
+                <div class="w-full max-w-sm">
+                    {{ $slot }}
+                </div>
+
             </div>
+
         </div>
-    </body>
+
+    </div>
+
+</body>
 </html>

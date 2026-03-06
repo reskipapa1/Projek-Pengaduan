@@ -28,7 +28,21 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        // Redirect berdasarkan role
+        if ($user->role === \App\Models\User::ROLE_SUPER_ADMIN) {
+            return redirect()->route('dashboard');
+        }
+
+        // Jika bukan admin (misal konsumen), logout saja & kembalikan dengan pesan error
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->withErrors([
+            'email' => 'Halaman ini hanya untuk Administrator.',
+        ]);
     }
 
     /**
