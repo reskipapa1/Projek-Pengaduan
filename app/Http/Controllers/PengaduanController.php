@@ -90,4 +90,26 @@ class PengaduanController extends Controller
                 return redirect()->route('pengaduan.index')->with ('success', 'Pengaduan berhasil ditambahkan.');
         }
 
+    // Fungsi untuk mengupdate status pengaduan (Hanya untuk Super Admin)
+    public function updateStatus(Request $request, Pengaduan $pengaduan)
+    {
+        // Validasi bahwa status yang dikirim sesuai dengan konstanta yang ada
+        $request->validate([
+            'status' => 'required|in:' . implode(',', [
+                Pengaduan::STATUS_PENDING,
+                Pengaduan::STATUS_DIPROSES,
+                Pengaduan::STATUS_SELESAI,
+                Pengaduan::STATUS_DITOLAK,
+            ]),
+        ]);
+
+        // Ubah status dan simpan ke database
+        $pengaduan->update([
+            'status' => $request->status
+        ]);
+
+        // Kembalikan ke halaman sebelumnya dengan pesan sukses
+        return back()->with('success', 'Status pengaduan berhasil diperbarui!');
+    }
+
     }

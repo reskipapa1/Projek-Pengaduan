@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
+    Route::patch('/pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.updateStatus');
 });
 
 

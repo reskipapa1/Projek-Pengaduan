@@ -19,7 +19,7 @@ class Pengaduan extends Model
         'status',
     ];
 
-     const STATUS_PENDING = 'pending';
+    const STATUS_PENDING = 'pending';
     const STATUS_DIPROSES = 'diproses';
     const STATUS_SELESAI = 'selesai';
     const STATUS_DITOLAK = 'ditolak';
