@@ -8,20 +8,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [PengaduanController::class, 'dashboard'])
-    ->middleware(['auth', 'verified', 'role:super_admin'])
-    ->name('dashboard');
-
-
-
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
+    Route::get('/dashboard', [PengaduanController::class, 'dashboard'])
+        ->name('dashboard');
+        
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index')->middleware('role:super_admin');
-    Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create')->middleware('role:konsumen');
-    Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store')->middleware('role:konsumen');
     
+    Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
+    Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+    Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 });
 
 

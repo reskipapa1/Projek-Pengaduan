@@ -15,10 +15,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
 
-   <body class="font-sans antialiased bg-gradient-to-br from-green-500 to-emerald-700">
+   <body class="font-sans antialiased bg-white">
             <div class="mt-7 flex justify-center">
     <a href="/">
-        <x-application-logo class="w-20 h-20 text-blue-600" />
+        <x-application-logo class="w-20 h-20 text-blue-600 bg-emerald-600" />
     </a>
 </div>
     <div class="min-h-screen flex items-center justify-center p-6">

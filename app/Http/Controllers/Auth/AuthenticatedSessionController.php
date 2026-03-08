@@ -40,9 +40,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->withErrors([
-            'email' => 'Halaman ini hanya untuk Administrator.',
-        ]);
+        return redirect()->route('login')->with('error', 'Akses ditolak! Hanya Super Admin yang diizinkan.');
     }
 
     /**

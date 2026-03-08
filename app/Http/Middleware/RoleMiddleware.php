@@ -15,8 +15,14 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, $role): Response
     {
-        if (auth()->guest() || auth()->user()->role !== $role) {
-            abort(403, 'Akses ditolak');
+        if (auth()->guest()) {
+            return redirect()->route('login');
+        }
+
+        if (auth()->user()->role !== $role) {
+            auth()->logout();
+
+            return redirect()->route('login')->with('error', 'Akses ditolak! Hanya Super Admin yang diizinkan.');
         }
 
         return $next($request);
