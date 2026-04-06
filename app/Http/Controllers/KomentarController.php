@@ -6,29 +6,38 @@ use Illuminate\Http\Request;
 
 class KomentarController extends Controller
 {
-    public function index(){
-        $komentars = komentar::latest()->get();
-        return view('komentar.index',compact('komentars'));
+    // === AKSES PUBLIK ===
+    public function indexPublic()
+    {
+        $komentars = \App\Models\Komentar::with('user')->latest()->get();
+        return view('komentar.public', compact('komentars'));
     }
 
-    public function create(){
-        return view('komentar.create');
-    }
-
-    public function store(Request $request){
-        $validated = $request->validate([
-            'isi_komentar' => 'required|min:5',
+    public function storePublic(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'isi_komentar' => 'required|min:5|max:1000',
         ]);
 
-         $data = [
-            'isi_komentar' => $validated['isi_komentar'],
-            'user_id'      => Auth::id(),      // Ambil ID user yang sedang login
-            'pengaduan_id' => $pengaduan_id,   // Ambil ID pengaduan dari URL
-        ];
+        $user = \App\Models\User::where('email', $request->email)->first();
 
-        komentar::create($data);
-        
-        return redirect()->route('komentar.index')->with('success','Komentar berhasil ditambahkan');
+        if (!$user) {
+            return back()->with('error', 'Email tidak ditemukan di sistem kami. Pastikan Anda telah terdaftar sebagai pengguna aplikasi.');
+        }
+
+        \App\Models\Komentar::create([
+            'user_id' => $user->id,
+            'isi_komentar' => $request->isi_komentar,
+        ]);
+
+        return redirect()->route('komentar.public')->with('success', 'Ulasan Anda berhasil dikirim!');
     }
 
+    // === AKSES ADMIN ===
+    public function indexAdmin()
+    {
+        $komentars = \App\Models\Komentar::with('user')->latest()->get();
+        return view('komentar.index', compact('komentars'));
+    }
 }

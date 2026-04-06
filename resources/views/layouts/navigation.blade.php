@@ -17,10 +17,13 @@
                    </x-nav-link>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:flex">
+                <div class="hidden space-x-8 sm:-my-px sm:flex sm:ml-6">
                      <x-nav-link :href="route('pengaduan.index')" :active="request()->routeIs('pengaduan.index')">
                         {{__('Pengaduan')}}
-                       </x-nav-link>
+                     </x-nav-link>
+                     <x-nav-link :href="route('komentar.admin')" :active="request()->routeIs('komentar.admin')">
+                        {{__('Komentar Layanan')}}
+                     </x-nav-link>
                 </div>
             </div>
 
@@ -81,6 +84,9 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('pengaduan.index')" :active="request()->routeIs('pengaduan.index')">
                 {{ __('Pengaduan') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('komentar.admin')" :active="request()->routeIs('komentar.admin')">
+                {{ __('Komentar Layanan') }}
             </x-responsive-nav-link>
         </div>
 

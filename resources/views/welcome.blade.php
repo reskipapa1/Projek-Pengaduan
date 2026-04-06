@@ -24,14 +24,8 @@
                 </a>
             @else
                 <a href="{{ route('login') }}" class="px-6 py-3 bg-green-400 text-white rounded-full border border-green-400 hover:bg-white hover:text-green-400 transition">
-                    Masuk
+                    Masuk Portal Admin
                 </a>
-
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="px-6 py-3 bg-green-400 text-white rounded-full border border-green-400 hover:bg-white hover:text-green-400 transition">
-                        Register
-                    </a>
-                @endif
                 @endauth
             @endif
         </div>
@@ -88,6 +82,79 @@
             </ul>
         </div>
 
+    </div>
+</section>
+
+<!-- Bagian Komentar Publik -->
+@php
+    $komentars = \App\Models\Komentar::with('user')->latest()->get();
+@endphp
+
+<section id="ulasan" class="w-full py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-3xl font-bold mb-8 text-emerald-600">Dinding Komentar & Ulasan Publik</h2>
+        
+        @if(session('success'))
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow mb-8 font-bold">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow mb-8 font-bold">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <div class="flex flex-col lg:flex-row gap-10">
+            <!-- Form Komentar -->
+            <div class="w-full lg:w-1/3">
+                <div class="bg-white rounded-2xl shadow p-6 sticky top-6">
+                    <h3 class="text-xl font-bold mb-2 text-emerald-700 border-b pb-3">Tinggalkan Ulasan</h3>
+                    <p class="text-gray-500 mb-6 text-sm">Sistem memvalidasi email Anda untuk memastikan ulasan berasal dari pengguna aplikasi resmi.</p>
+                    
+                    <form action="{{ route('komentar.public.store') }}" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2 text-sm">Email Akun App</label>
+                            <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500 px-4 py-2" placeholder="contoh: pengguna@gmail.com">
+                            @error('email') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-semibold mb-2 text-sm">Komentar Penilaian</label>
+                            <textarea name="isi_komentar" required rows="4" class="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 px-4 py-2" placeholder="Ceritakan kepuasan kinerja DLHK di daerah Anda..."></textarea>
+                            @error('isi_komentar') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow w-full">
+                            Kirim Ulasan Layanan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List Komentar -->
+            <div class="w-full lg:w-2/3">
+                <div class="space-y-4">
+                    @forelse($komentars as $k)
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-emerald-500">
+                            <div class="flex items-center mb-3">
+                                <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold mr-4">
+                                    {{ strtoupper(substr($k->user->name, 0, 1)) }}
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-900">{{ $k->user->name }}</h4>
+                                </div>
+                                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-3 py-1 rounded-full">{{ $k->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-gray-700 whitespace-pre-line text-[15px] leading-relaxed ml-14">{{ $k->isi_komentar }}</p>
+                        </div>
+                    @empty
+                        <div class="text-center text-gray-500 py-12 bg-white rounded-xl shadow border-2 border-dashed border-gray-200">
+                            <span class="font-semibold text-lg">Belum ada ulasan warga yang masuk.</span>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     </div>
 </section>
     

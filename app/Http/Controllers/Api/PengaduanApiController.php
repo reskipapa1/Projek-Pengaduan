@@ -42,6 +42,7 @@ class PengaduanApiController extends Controller
 
             // 3. Simpan ke Database
             $pengaduan = Pengaduan::create([
+                'user_id'        => $request->user()->id,
                 'lokasi'         => $request->lokasi,
                 'alamat'         => $request->alamat,
                 'kategori'       => $request->kategori,
@@ -64,5 +65,128 @@ class PengaduanApiController extends Controller
                 'message' => 'Terjadi Kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Tampilkan List Pengaduan berdasarkan Role
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        $query = Pengaduan::latest();
+
+        // Implementasi Role Filtering
+        if ($user->role == \App\Models\User::ROLE_KONSUMEN) {
+            // Jika request meminta 'type=me', tampilkan laporan miliknya saja
+            if ($request->query('type') === 'me') {
+                $query->where('user_id', $user->id); 
+            }
+            // Jika tidak, tampilkan semua laporan 
+        }
+
+        $pengaduans = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar Pengaduan',
+            'data' => $pengaduans
+        ], 200);
+    }
+
+    /**
+     * Tampilkan Detail Pengaduan
+     */
+    public function show($id)
+    {
+        $pengaduan = Pengaduan::find($id);
+
+        if (!$pengaduan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengaduan tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail Pengaduan',
+            'data' => $pengaduan
+        ], 200);
+    }
+
+    /**
+     * Update Status Pengaduan (Khusus Super Admin & Admin Penanganan)
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $user = $request->user();
+
+        // Cek Role
+        if (!in_array($user->role, [\App\Models\User::ROLE_SUPER_ADMIN, \App\Models\User::ROLE_ADMIN_PENANGANAN])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk mengubah status'
+            ], 403);
+        }
+
+        $pengaduan = Pengaduan::find($id);
+
+        if (!$pengaduan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pengaduan tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'status' => 'required|in:' . implode(',', [
+                Pengaduan::STATUS_PENDING,
+                Pengaduan::STATUS_DIPROSES,
+                Pengaduan::STATUS_SELESAI,
+                Pengaduan::STATUS_DITOLAK,
+            ]),
+        ]);
+
+        $pengaduan->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status pengaduan berhasil diperbarui',
+            'data' => $pengaduan
+        ], 200);
+    }
+
+    /**
+     * Tampilkan Semua Pengaduan untuk Kepala Bagian
+     */
+    public function all(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== \App\Models\User::ROLE_KEPALA_BAGIAN && $user->role !== \App\Models\User::ROLE_SUPER_ADMIN) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $pengaduans = Pengaduan::with(['user', 'penugasan.progres', 'penugasan.petugas'])->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua Data Pengaduan',
+            'data' => $pengaduans
+        ], 200);
+    }
+
+    /**
+     * Download PDF untuk Laporan (Diakses via Mobile Browser URL)
+     */
+    public function exportPdf($id)
+    {
+        $pengaduan = Pengaduan::with(['user', 'penugasan.petugas', 'penugasan.progres'])->findOrFail($id);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf', compact('pengaduan'));
+        
+        return $pdf->download('laporan-pengaduan-' . $pengaduan->id . '-' . date('Ymd') . '.pdf');
     }
 }

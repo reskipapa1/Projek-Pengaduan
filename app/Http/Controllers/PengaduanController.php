@@ -98,6 +98,7 @@ class PengaduanController extends Controller
             'status' => 'required|in:' . implode(',', [
                 Pengaduan::STATUS_PENDING,
                 Pengaduan::STATUS_DIPROSES,
+                Pengaduan::STATUS_MENUNGGU_VERIFIKASI,
                 Pengaduan::STATUS_SELESAI,
                 Pengaduan::STATUS_DITOLAK,
             ]),
@@ -108,8 +109,36 @@ class PengaduanController extends Controller
             'status' => $request->status
         ]);
 
+        // Jika status diubah menjadi diproses (Diterima & Proses)
+        // Kita juga harus membuat Penugasan untuk admin_penanganan
+        if ($request->status === Pengaduan::STATUS_DIPROSES) {
+            // Cek apakah sudah ada penugasan untuk pengaduan ini
+            $exists = \App\Models\Penugasan::where('pengaduan_id', $pengaduan->id)->exists();
+            
+            if (!$exists) {
+                // Ambil satu petugas admin_penanganan (bisa diubah nanti jika butuh pilih manual)
+                $petugas = \App\Models\User::where('role', \App\Models\User::ROLE_ADMIN_PENANGANAN)->first();
+                
+                if ($petugas) {
+                    \App\Models\Penugasan::create([
+                        'pengaduan_id' => $pengaduan->id,
+                        'petugas_id' => $petugas->id,
+                        'status_penugasan' => 'ditugaskan', // status penugasan awal
+                    ]);
+                }
+            }
+        }
+
         // Kembalikan ke halaman sebelumnya dengan pesan sukses
         return back()->with('success', 'Status pengaduan berhasil diperbarui!');
     }
 
+    public function exportPdf(Pengaduan $pengaduan)
+    {
+        $pengaduan->load(['user', 'penugasan.petugas', 'penugasan.progres']);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf', compact('pengaduan'));
+        
+        return $pdf->download('laporan-pengaduan-' . $pengaduan->id . '-' . date('Ymd') . '.pdf');
     }
+}

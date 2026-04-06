@@ -21,8 +21,13 @@ class RoleMiddleware
 
         if (auth()->user()->role !== $role) {
             auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            // Flash the message after the session has been regenerated
+            $request->session()->flash('error', 'Akses ditolak! Hanya Super Admin yang diizinkan.');
 
-            return redirect()->route('login')->with('error', 'Akses ditolak! Hanya Super Admin yang diizinkan.');
+            return redirect()->route('login');
         }
 
         return $next($request);
