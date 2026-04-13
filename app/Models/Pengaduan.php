@@ -47,4 +47,9 @@ class Pengaduan extends Model
     {
         return $this->hasOne(Penugasan::class, 'pengaduan_id');
     }
+
+    public function komentars()
+    {
+        return $this->hasMany(Komentar::class, 'pengaduan_id');
+    }
 }

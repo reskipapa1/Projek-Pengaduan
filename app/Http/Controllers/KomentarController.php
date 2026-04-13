@@ -9,7 +9,7 @@ class KomentarController extends Controller
     // === AKSES PUBLIK ===
     public function indexPublic()
     {
-        $komentars = \App\Models\Komentar::with('user')->latest()->get();
+        $komentars = \App\Models\Komentar::with('user.profile')->latest()->get();
         return view('komentar.public', compact('komentars'));
     }
 
@@ -37,7 +37,7 @@ class KomentarController extends Controller
     // === AKSES ADMIN ===
     public function indexAdmin()
     {
-        $komentars = \App\Models\Komentar::with('user')->latest()->get();
+        $komentars = \App\Models\Komentar::with('user.profile')->latest()->get();
         return view('komentar.index', compact('komentars'));
     }
 }

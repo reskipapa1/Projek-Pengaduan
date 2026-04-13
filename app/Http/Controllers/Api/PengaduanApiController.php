@@ -17,10 +17,10 @@ class PengaduanApiController extends Controller
     {
         // 1. Validasi Input
         $validator = Validator::make($request->all(), [
-            'lokasi'         => 'required|in:bukit_raya,bina_widya,marpoyan_damai,senapelan,rumbai',
-            'alamat'         => 'required|string',
-            'kategori'       => 'required|in:tps,lps',
-            'isi_laporan'    => 'required|string',
+            'lokasi' => 'required|in:bukit_raya,bina_widya,marpoyan_damai,senapelan,rumbai',
+            'alamat' => 'required|string',
+            'kategori' => 'required|in:tps,lps',
+            'isi_laporan' => 'required|string',
             'foto_pengaduan' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Opsional, maks 2MB
         ]);
 
@@ -28,7 +28,7 @@ class PengaduanApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi Gagal',
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 
@@ -42,20 +42,20 @@ class PengaduanApiController extends Controller
 
             // 3. Simpan ke Database
             $pengaduan = Pengaduan::create([
-                'user_id'        => $request->user()->id,
-                'lokasi'         => $request->lokasi,
-                'alamat'         => $request->alamat,
-                'kategori'       => $request->kategori,
-                'isi_laporan'    => $request->isi_laporan,
+                'user_id' => $request->user()->id,
+                'lokasi' => $request->lokasi,
+                'alamat' => $request->alamat,
+                'kategori' => $request->kategori,
+                'isi_laporan' => $request->isi_laporan,
                 'foto_pengaduan' => $imagePath, // Path gambar yang sudah diupload
-                'status'         => 'pending', // Sesuai default di database
+                'status' => 'pending', // Sesuai default di database
             ]);
 
             // 4. Return Berhasil
             return response()->json([
                 'success' => true,
                 'message' => 'Pengaduan Berhasil Dikirim',
-                'data'    => $pengaduan
+                'data' => $pengaduan
             ], 201);
 
         } catch (\Exception $e) {
@@ -73,13 +73,13 @@ class PengaduanApiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Pengaduan::latest();
+        $query = Pengaduan::with(['komentars.user:id,email'])->latest();
 
         // Implementasi Role Filtering
         if ($user->role == \App\Models\User::ROLE_KONSUMEN) {
             // Jika request meminta 'type=me', tampilkan laporan miliknya saja
             if ($request->query('type') === 'me') {
-                $query->where('user_id', $user->id); 
+                $query->where('user_id', $user->id);
             }
             // Jika tidak, tampilkan semua laporan 
         }
@@ -169,7 +169,7 @@ class PengaduanApiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $pengaduans = Pengaduan::with(['user', 'penugasan.progres', 'penugasan.petugas'])->latest()->get();
+        $pengaduans = Pengaduan::with(['user', 'penugasan.progres', 'penugasan.petugas', 'komentars.user:id,email'])->latest()->get();
 
         return response()->json([
             'success' => true,
@@ -184,9 +184,41 @@ class PengaduanApiController extends Controller
     public function exportPdf($id)
     {
         $pengaduan = Pengaduan::with(['user', 'penugasan.petugas', 'penugasan.progres'])->findOrFail($id);
-        
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf', compact('pengaduan'));
-        
+
         return $pdf->download('laporan-pengaduan-' . $pengaduan->id . '-' . date('Ymd') . '.pdf');
+    }
+
+    /**
+     * Tambah Komentar ke Pengaduan (Hanya Pelapor)
+     */
+    public function storeKomentar(Request $request, $id)
+    {
+        $request->validate([
+            'isi_komentar' => 'required|string|max:1000'
+        ]);
+
+        $pengaduan = Pengaduan::find($id);
+
+        if (!$pengaduan) {
+            return response()->json(['success' => false, 'message' => 'Pengaduan tidak ditemukan'], 404);
+        }
+
+        // Cek apakah user adalah pembuat pengaduan
+        if ($pengaduan->user_id !== $request->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Hanya pelapor yang dapat berkomentar pada pengaduan ini'], 403);
+        }
+
+        $komentar = $pengaduan->komentars()->create([
+            'user_id' => $request->user()->id,
+            'isi_komentar' => $request->isi_komentar
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Komentar berhasil ditambahkan',
+            'data' => $komentar->load('user:id,name,email')
+        ], 201);
     }
 }

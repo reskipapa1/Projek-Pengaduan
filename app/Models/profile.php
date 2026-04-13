@@ -18,6 +18,7 @@ class Profile extends Model
         'no_telp',
         'alamat',
         'foto_profil',
+        'lokasi',
     ];
 
     public function user()

@@ -19,6 +19,7 @@ Route::get('/pengaduan/{id}/export-pdf', [PengaduanApiController::class, 'export
 Route::middleware('auth:sanctum')->group(function () {
     // Route Auth (Protected)
     Route::get('/profile', [AuthApiController::class, 'profile']);
+    Route::post('/profile/update', [AuthApiController::class, 'updateProfile']);
     Route::post('/logout', [AuthApiController::class, 'logout']);
 
     // Route Pengaduan (Protected)
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pengaduan/all', [PengaduanApiController::class, 'all']); // Untuk Kepala Bagian
     Route::get('/pengaduan', [PengaduanApiController::class, 'index']);
     Route::get('/pengaduan/{id}', [PengaduanApiController::class, 'show']);
+    Route::post('/pengaduan/{id}/komentar', [PengaduanApiController::class, 'storeKomentar']);
     Route::put('/pengaduan/{id}/status', [PengaduanApiController::class, 'updateStatus']);
 
     // Route Penugasan (Admin Penanganan)

@@ -14,7 +14,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">Tanggal</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">Nama Warga</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">NIK</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">No. Telp</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">Alamat</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-800 uppercase tracking-wider">Isi Komentar / Ulasan</th>
                             </tr>
                         </thead>
@@ -22,8 +25,11 @@
                             @forelse($komentars as $k)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $k->created_at->format('d/m/Y H:i') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ $k->user->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ $k->user->profile->name ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $k->user->profile->Nik ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $k->user->email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $k->user->profile->no_telp ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $k->user->profile->alamat ?? '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-700 italic">"{{ $k->isi_komentar }}"</td>
                                 </tr>
                             @empty

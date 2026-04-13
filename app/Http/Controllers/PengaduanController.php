@@ -13,15 +13,19 @@ class PengaduanController extends Controller
         // STEP A: Ambil Data
     // Pengaduan::latest() -> Artinya urutkan dari yang paling baru dibuat.
     // ->get()             -> Eksekusi ambil datanya sekarang.
-        $pengaduans = Pengaduan::latest()->get();
+        $pengaduans = Pengaduan::with('user.profile')->latest()->get();
 
         // STEP B: Kirim ke Layar (View)
     // view('pengaduan.index') -> Buka file di resources/views/pengaduan/index.blade.php
     // compact('pengaduan')    -> Bawa variabel $pengaduan tadi ke sana biar bisa ditampilkan.
 
         return view('pengaduan.index', compact('pengaduans'));
+    }
 
-        
+    public function show(Pengaduan $pengaduan)
+    {
+        $pengaduan->load(['user', 'penugasan.petugas', 'penugasan.progres', 'komentars.user']);
+        return view('pengaduan.show', compact('pengaduan'));
     }
 
      public function dashboard()
@@ -110,22 +114,35 @@ class PengaduanController extends Controller
         ]);
 
         // Jika status diubah menjadi diproses (Diterima & Proses)
-        // Kita juga harus membuat Penugasan untuk admin_penanganan
+        // Cari admin_penanganan yang lokasinya sesuai dengan lokasi pengaduan
         if ($request->status === Pengaduan::STATUS_DIPROSES) {
             // Cek apakah sudah ada penugasan untuk pengaduan ini
             $exists = \App\Models\Penugasan::where('pengaduan_id', $pengaduan->id)->exists();
-            
+
             if (!$exists) {
-                // Ambil satu petugas admin_penanganan (bisa diubah nanti jika butuh pilih manual)
-                $petugas = \App\Models\User::where('role', \App\Models\User::ROLE_ADMIN_PENANGANAN)->first();
-                
-                if ($petugas) {
-                    \App\Models\Penugasan::create([
-                        'pengaduan_id' => $pengaduan->id,
-                        'petugas_id' => $petugas->id,
-                        'status_penugasan' => 'ditugaskan', // status penugasan awal
-                    ]);
+                // Cari admin_penanganan yang lokasinya sama dengan lokasi pengaduan
+                $namaLokasi = ucwords(str_replace('_', ' ', $pengaduan->lokasi));
+                $petugas = \App\Models\User::where('role', \App\Models\User::ROLE_ADMIN_PENANGANAN)
+                    ->whereHas('profile', function ($q) use ($pengaduan) {
+                        $q->where('lokasi', $pengaduan->lokasi);
+                    })
+                    ->first();
+
+                if (!$petugas) {
+                    // Batalkan perubahan status — kembalikan ke pending
+                    $pengaduan->update(['status' => Pengaduan::STATUS_PENDING]);
+                    return back()->with(
+                        'error',
+                        "Belum ada Admin Penanganan yang bertugas di daerah \"{$namaLokasi}\". " .
+                        "Silakan tambahkan akun admin untuk daerah tersebut terlebih dahulu, kemudian ubah status kembali."
+                    );
                 }
+
+                \App\Models\Penugasan::create([
+                    'pengaduan_id' => $pengaduan->id,
+                    'petugas_id'   => $petugas->id,
+                    'status_penugasan' => 'ditugaskan',
+                ]);
             }
         }
 
@@ -140,5 +157,33 @@ class PengaduanController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf', compact('pengaduan'));
         
         return $pdf->download('laporan-pengaduan-' . $pengaduan->id . '-' . date('Ymd') . '.pdf');
+    }
+
+    public function exportPdfGlobal()
+    {
+        $pengaduans = Pengaduan::with(['user'])->latest()->get();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf_global', compact('pengaduans'));
+        return $pdf->download('rekap-pengaduan-' . date('Ymd') . '.pdf');
+    }
+
+    public function exportExcel()
+    {
+        $pengaduans = Pengaduan::with('user')->get();
+        return response()->streamDownload(function() use ($pengaduans) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Pelapor', 'Kategori', 'Lokasi', 'Alamat', 'Status', 'Tanggal']);
+            foreach ($pengaduans as $p) {
+                fputcsv($handle, [
+                    $p->id,
+                    $p->user ? $p->user->name : 'Anonim',
+                    strtoupper($p->kategori),
+                    ucwords(str_replace('_', ' ', $p->lokasi)),
+                    $p->alamat,
+                    $p->status,
+                    $p->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+            fclose($handle);
+        }, 'rekap-pengaduan-' . date('Ymd') . '.csv');
     }
 }

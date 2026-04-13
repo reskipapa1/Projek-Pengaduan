@@ -1,80 +1,112 @@
 <x-app-layout>
-    <div class="py-10">
-        <div class="w-full px-10">
+    <x-slot name="header">
+        <h2 class="font-bold text-2xl text-slate-800 leading-tight">
+            {{ __('Dashboard Admin Pengaduan') }}
+        </h2>
+    </x-slot>
 
-            <!-- Heading -->
-            <h1 class="text-2xl font-bold mb-4">
-                Dashboard Admin Pengaduan
-            </h1>
-            <!-- greeting -->
-            <div class="text-gray-900 mb-4 p-5">
-                    {{ __("halo..") }} {{ Auth::user()->name }}
+    <div class="py-10 bg-slate-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Greeting -->
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-lg p-8 mb-8 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 -m-8 opacity-20">
+                    <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 22h20L12 2zm0 3.8l7.5 15H4.5L12 5.8z"/></svg>
                 </div>
+                <h1 class="text-3xl font-extrabold mb-2 relative z-10">
+                    Halo, {{ Auth::user()->name }}! 👋
+                </h1>
+                <p class="text-emerald-50 relative z-10 font-medium">Selamat datang kembali di pusat manajemen pengaduan DLHK.</p>
+            </div>
 
             <!-- Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h2 class="text-sm text-gray-500">Total Pengaduan</h2>
-                    <p class="text-3xl font-bold text-indigo-600">
-                        {{ $totalPengaduan ?? 0 }}
-                    </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Card 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div class="p-4 bg-indigo-100 text-indigo-600 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-500 mb-1">Total Pengaduan</h2>
+                        <p class="text-3xl font-bold text-slate-800">{{ $totalPengaduan ?? 0 }}</p>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h2 class="text-sm text-gray-500">Pengaduan Hari Ini</h2>
-                    <p class="text-3xl font-bold text-blue-600">
-                        {{ $hariIni ?? 0 }}
-                    </p>
+                <!-- Card 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div class="p-4 bg-sky-100 text-sky-600 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-500 mb-1">Pengaduan Hari Ini</h2>
+                        <p class="text-3xl font-bold text-slate-800">{{ $hariIni ?? 0 }}</p>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h2 class="text-sm text-gray-500">Sedang Diproses</h2>
-                    <p class="text-3xl font-bold text-yellow-500">
-                        {{ $diproses ?? 0 }}
-                    </p>
+                <!-- Card 3 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div class="p-4 bg-amber-100 text-amber-600 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-500 mb-1">Sedang Diproses</h2>
+                        <p class="text-3xl font-bold text-slate-800">{{ $diproses ?? 0 }}</p>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h2 class="text-sm text-gray-500">Selesai</h2>
-                    <p class="text-3xl font-bold text-green-600">
-                        {{ $selesai ?? 0 }}
-                    </p>
+                <!-- Card 4 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div class="p-4 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-500 mb-1">Selesai Ditangani</h2>
+                        <p class="text-3xl font-bold text-slate-800">{{ $selesai ?? 0 }}</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Pengaduan Terbaru -->
-            <div class="bg-white rounded-2xl shadow-md p-6 mb-10">
-                <h2 class="text-lg font-semibold mb-4">
-                    Pengaduan Terbaru
-                </h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">Pengaduan Terbaru</h2>
+                    <a href="{{ route('pengaduan.index') }}" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">Lihat Semua &rarr;</a>
+                </div>
 
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="border-b">
-                            <th class="py-2">Pelapor</th>
-                            <th class="py-2">Kategori</th>
-                            <th class="py-2">Status</th>
-                            <th class="py-2">Tanggal</th>
-                        </tr>
-                    </thead>
-                <tbody>
-                    @foreach($pengaduanTerbaru ?? [] as $item)
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-2">{{ $item->nama ?? '-' }}</td>
-                        <td class="py-2">{{ strtoupper($item->kategori) ?? '-' }}</td>
-                        <td class="py-2 font-semibold">
-                            <span class="{{ $item->status_color }}">
-                                {{ ucfirst($item->status) }}
-                            </span>
-                        </td>
-                        <td class="py-2">
-                            {{ $item->created_at?->format('d M Y') }}
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-sm">
+                                <th class="py-4 px-6 font-semibold">Pelapor</th>
+                                <th class="py-4 px-6 font-semibold">Kategori</th>
+                                <th class="py-4 px-6 font-semibold">Status</th>
+                                <th class="py-4 px-6 font-semibold">Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            @forelse($pengaduanTerbaru ?? [] as $item)
+                            <tr class="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                <td class="py-4 px-6 font-medium text-slate-800">{{ $item->user?->name ?? 'Anonim' }}</td>
+                                <td class="py-4 px-6 text-slate-600">
+                                    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold">{{ strtoupper($item->kategori ?? '-') }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="{{ $item->status_color ?? 'bg-gray-100' }} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border bg-opacity-10">
+                                        {{ $item->status ?? 'pending' }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 text-slate-500">
+                                    {{ $item->created_at?->format('d M Y') }}
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="py-8 text-center text-slate-500 italic">Belum ada pengaduan terbaru</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>

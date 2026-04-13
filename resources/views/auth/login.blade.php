@@ -19,14 +19,16 @@
         <div>
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input class="block mt-1 w-full rounded-lg"
-                type="email" name="email"
-                :value="old('email')" required />
+                type="email" name="email" id="email"
+                :value="old('email')" required autofocus />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <div>
             <x-input-label for="password" :value="__('Password')" />
             <x-text-input class="block mt-1 w-full rounded-lg"
-                type="password" name="password" required />
+                type="password" name="password" id="password" required />
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <div class="flex justify-between items-center text-sm">

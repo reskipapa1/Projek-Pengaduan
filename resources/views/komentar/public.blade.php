@@ -58,10 +58,10 @@
                 <div class="bg-white rounded-xl shadow p-6 border-l-4 border-emerald-500">
                     <div class="flex items-center mb-3">
                         <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg mr-3 shadow-sm">
-                            {{ strtoupper(substr($k->user->name, 0, 1)) }}
+                            {{ strtoupper(substr($k->user->profile->name ?? $k->user->email, 0, 1)) }}
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-900">{{ $k->user->name }}</h4>
+                            <h4 class="font-bold text-gray-900">{{ $k->user->profile->name ?? 'Pengguna' }}</h4>
                             <p class="text-xs text-gray-500">{{ $k->created_at->diffForHumans() }}</p>
                         </div>
                     </div>

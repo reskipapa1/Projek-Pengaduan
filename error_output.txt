@@ -1,0 +1,1 @@
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'name' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: project-kp, SQL: select `id`, `name`, `email` from `users` where `users`.`id` in (2))

@@ -111,6 +111,53 @@ class AuthApiController extends Controller
     }
 
     /**
+     * Update User Profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name'       => 'nullable|string|max:255',
+            'no_telp'    => 'nullable|string|max:20',
+            'alamat'     => 'nullable|string|max:500',
+            'foto_profil'=> 'nullable|image|max:3000',
+        ]);
+
+        $user = $request->user();
+
+        try {
+            $data = [
+                'name'    => $request->name,
+                'no_telp' => $request->no_telp,
+                'alamat'  => $request->alamat,
+            ];
+
+            // Upload foto jika ada
+            if ($request->hasFile('foto_profil')) {
+                $path = $request->file('foto_profil')->store('profil', 'public');
+                $data['foto_profil'] = $path;
+            }
+
+            if ($user->profile) {
+                $user->profile->update($data);
+            } else {
+                $user->profile()->create(array_merge($data, ['Nik' => '-']));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berhasil diperbarui',
+                'data'    => $user->load('profile'),
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui profil: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Logout User (Revoke the token)
      */
     public function logout(Request $request)

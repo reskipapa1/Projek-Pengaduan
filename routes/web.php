@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PenggunaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,15 +20,18 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
+    Route::get('/pengaduan/{pengaduan}', [PengaduanController::class, 'show'])->name('pengaduan.show');
+    Route::get('/pengaduan/export/excel', [PengaduanController::class, 'exportExcel'])->name('pengaduan.exportExcel');
+    Route::get('/pengaduan/export/pdf-global', [PengaduanController::class, 'exportPdfGlobal'])->name('pengaduan.exportPdfGlobal');
     Route::patch('/pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.updateStatus');
     Route::get('/pengaduan/{pengaduan}/export-pdf', [PengaduanController::class, 'exportPdf'])->name('pengaduan.exportPdf');
 
     // Admin Komentar
     Route::get('/admin/komentar', [\App\Http\Controllers\KomentarController::class, 'indexAdmin'])->name('komentar.admin');
-});
 
-// Public Komentar
-Route::get('/layanan/komentar', [\App\Http\Controllers\KomentarController::class, 'indexPublic'])->name('komentar.public');
-Route::post('/layanan/komentar', [\App\Http\Controllers\KomentarController::class, 'storePublic'])->name('komentar.public.store');
+    // Manajemen Pengguna
+    Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
+    Route::patch('/pengguna/{user}/lokasi', [PenggunaController::class, 'updateLokasi'])->name('pengguna.updateLokasi');
+});
 
 require __DIR__.'/auth.php';
