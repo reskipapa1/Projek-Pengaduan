@@ -12,11 +12,11 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::get('/dashboard', [PengaduanController::class, 'dashboard'])
         ->name('dashboard');
-        
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
@@ -31,7 +31,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
 
     // Manajemen Pengguna
     Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
+    Route::post('/pengguna', [PenggunaController::class, 'store'])->name('pengguna.store');
+    Route::delete('/pengguna/{user}', [PenggunaController::class, 'destroy'])->name('pengguna.destroy');
     Route::patch('/pengguna/{user}/lokasi', [PenggunaController::class, 'updateLokasi'])->name('pengguna.updateLokasi');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

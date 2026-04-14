@@ -11,13 +11,13 @@ class PengaduanController extends Controller
     public function index()
     {
         // STEP A: Ambil Data
-    // Pengaduan::latest() -> Artinya urutkan dari yang paling baru dibuat.
-    // ->get()             -> Eksekusi ambil datanya sekarang.
+        // Pengaduan::latest() -> Artinya urutkan dari yang paling baru dibuat.
+        // ->get()             -> Eksekusi ambil datanya sekarang.
         $pengaduans = Pengaduan::with('user.profile')->latest()->get();
 
         // STEP B: Kirim ke Layar (View)
-    // view('pengaduan.index') -> Buka file di resources/views/pengaduan/index.blade.php
-    // compact('pengaduan')    -> Bawa variabel $pengaduan tadi ke sana biar bisa ditampilkan.
+        // view('pengaduan.index') -> Buka file di resources/views/pengaduan/index.blade.php
+        // compact('pengaduan')    -> Bawa variabel $pengaduan tadi ke sana biar bisa ditampilkan.
 
         return view('pengaduan.index', compact('pengaduans'));
     }
@@ -28,71 +28,72 @@ class PengaduanController extends Controller
         return view('pengaduan.show', compact('pengaduan'));
     }
 
-     public function dashboard()
-{
-    $totalPengaduan = Pengaduan::count();
-    $hariIni = Pengaduan::whereDate('created_at', today())->count();
-    $diproses = Pengaduan::where('status', Pengaduan::STATUS_DIPROSES)->count();
-    $selesai = Pengaduan::where('status', Pengaduan::STATUS_SELESAI)->count();
+    public function dashboard()
+    {
+        $totalPengaduan = Pengaduan::count();
+        $hariIni = Pengaduan::whereDate('created_at', today())->count();
+        $diproses = Pengaduan::where('status', Pengaduan::STATUS_DIPROSES)->count();
+        $selesai = Pengaduan::where('status', Pengaduan::STATUS_SELESAI)->count();
 
-    $pengaduanTerbaru = Pengaduan::latest()->take(5)->get();
+        $pengaduanTerbaru = Pengaduan::latest()->take(5)->get();
 
-    return view('dashboard', compact(
-        'totalPengaduan',
-        'hariIni',
-        'diproses',
-        'selesai',
-        'pengaduanTerbaru'
-    ));
-}
-    
+        return view('dashboard', compact(
+            'totalPengaduan',
+            'hariIni',
+            'diproses',
+            'selesai',
+            'pengaduanTerbaru'
+        ));
+    }
 
-    public function create(){
+
+    public function create()
+    {
         // Langsung buka file resources/views/pengaduan/create.blade.php
-    // Gak perlu bawa data apa-apa karena form-nya kan masih kosong.
+        // Gak perlu bawa data apa-apa karena form-nya kan masih kosong.
         return view('pengaduan.create');
     }
 
-        public function store(Request $request)
-        {
-            // $request = Isinya semua data yang diketik user di form (judul, isi, foto, dll).
+    public function store(Request $request)
+    {
+        // $request = Isinya semua data yang diketik user di form (judul, isi, foto, dll).
 
         // STEP A: Validasi (Satpam)
         // Cek dulu, kalau datanya gak sesuai aturan, tendang balik ke form.
 
-            $validated = $request -> validate([
-                'alamat' => 'required|max:50',
-                'isi_laporan' => 'required|min:7',
-                'foto_pengaduan' => 'required|image|max:5000',
-                'kategori' => 'required|in:tps,lps',
-                'lokasi' => 'required|in:bukit_raya,bina_widya,marpoyan_damai,senapelan,rumbai',
-                ]);
-                
-                // Pengaduan::create([
-                //     'alamat' => $request->alamat,
-                //     'isi_laporan' => $request->isi_laporan,
-                //     'kategori' => $request->kategori,
-                //     'lokasi' => $request->lokasi,
-                //     'status' => 'pending',
-                // ]);
+        $validated = $request->validate([
+            'alamat' => 'required|max:50',
+            'isi_laporan' => 'required|min:7',
+            'foto_pengaduan' => 'required|image|max:5000',
+            'kategori' => 'required|tps',
+            'lokasi' => 'required|in:bukit_raya,bina_widya,marpoyan_damai,senapelan,rumbai',
+        ]);
 
-                // 2. Tambahkan data lain yang bukan inputan user (status default)
+        // Pengaduan::create([
+        //     'alamat' => $request->alamat,
+        //     'isi_laporan' => $request->isi_laporan,
+        //     'kategori' => $request->kategori,
+        //     'lokasi' => $request->lokasi,
+        //     'status' => 'pending',
+        // ]);
+
+        // 2. Tambahkan data lain yang bukan inputan user (status default)
         // array_merge menggabungkan data $validated dengan data tambahan kita
-                
-               // SIMPAN FILE FOTO
-                $pathFoto = $request->file('foto_pengaduan')
-                                    ->store('pengaduan', 'public');
 
-                // GABUNG DATA + PATH FOTO
-                $data = array_merge($validated, [
-                    'foto_pengaduan' => $pathFoto,
-                    'status' => 'pending',
-                ]);
+        // SIMPAN FILE FOTO
+        $pathFoto = $request->file('foto_pengaduan')
+            ->store('pengaduan', 'public');
 
-                Pengaduan::create($data);
+        // GABUNG DATA + PATH FOTO
+        $data = array_merge($validated, [
+            'foto_pengaduan' => $pathFoto,
+            'status' => 'pending',
+        ]);
 
-                return redirect()->route('pengaduan.index')->with ('success', 'Pengaduan berhasil ditambahkan.');
-        }
+        Pengaduan::create($data);
+
+        return redirect()->route('pengaduan.index')->with('success', 'Pengaduan berhasil ditambahkan.');
+    }
 
     // Fungsi untuk mengupdate status pengaduan (Hanya untuk Super Admin)
     public function updateStatus(Request $request, Pengaduan $pengaduan)
@@ -112,6 +113,15 @@ class PengaduanController extends Controller
         $pengaduan->update([
             'status' => $request->status
         ]);
+
+        // Sesuaikan status penugasan jika pengaduan selesai atau ditolak
+        if ($request->status === Pengaduan::STATUS_SELESAI || $request->status === Pengaduan::STATUS_DITOLAK) {
+            if ($pengaduan->penugasan) {
+                $pengaduan->penugasan->update([
+                    'status_penugasan' => $request->status
+                ]);
+            }
+        }
 
         // Jika status diubah menjadi diproses (Diterima & Proses)
         // Cari admin_penanganan yang lokasinya sesuai dengan lokasi pengaduan
@@ -140,7 +150,7 @@ class PengaduanController extends Controller
 
                 \App\Models\Penugasan::create([
                     'pengaduan_id' => $pengaduan->id,
-                    'petugas_id'   => $petugas->id,
+                    'petugas_id' => $petugas->id,
                     'status_penugasan' => 'ditugaskan',
                 ]);
             }
@@ -153,9 +163,9 @@ class PengaduanController extends Controller
     public function exportPdf(Pengaduan $pengaduan)
     {
         $pengaduan->load(['user', 'penugasan.petugas', 'penugasan.progres']);
-        
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengaduan.pdf', compact('pengaduan'));
-        
+
         return $pdf->download('laporan-pengaduan-' . $pengaduan->id . '-' . date('Ymd') . '.pdf');
     }
 
@@ -169,7 +179,7 @@ class PengaduanController extends Controller
     public function exportExcel()
     {
         $pengaduans = Pengaduan::with('user')->get();
-        return response()->streamDownload(function() use ($pengaduans) {
+        return response()->streamDownload(function () use ($pengaduans) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['ID', 'Pelapor', 'Kategori', 'Lokasi', 'Alamat', 'Status', 'Tanggal']);
             foreach ($pengaduans as $p) {

@@ -90,5 +90,23 @@ class DatabaseSeeder extends Seeder
                 'no_telp' => '083333333333',
             ]
         );
+
+         $adminPenanganan = User::firstOrCreate(
+            ['email' => 'adminpenanganan1@example.com'],
+            [
+                'password' => bcrypt('password'),
+                'role' => User::ROLE_ADMIN_PENANGANAN,
+            ]
+        );
+
+        \App\Models\Profile::firstOrCreate(
+            ['user_id' => $adminPenanganan->id],
+            [
+                'Nik' => '4444444444444444',
+                'name' => 'Admin Penanganan 2',
+                'alamat' => 'senapelan',
+                'no_telp' => '083333333335',
+            ]
+        );
     }
 }

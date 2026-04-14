@@ -21,6 +21,23 @@
                     <span class="font-medium">{{ session('error') }}</span>
                 </div>
             @endif
+            
+            @if($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-xl shadow-sm mb-6">
+                    <ul class="list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="mb-6 flex justify-end">
+                <button onclick="openAddModal()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Tambah Pengguna
+                </button>
+            </div>
 
             {{-- ===== SECTION: Admin Penanganan ===== --}}
             <div class="mb-10">
@@ -44,7 +61,7 @@
                                     <th class="py-4 px-6 font-semibold">NIK</th>
                                     <th class="py-4 px-6 font-semibold">NO. TELP</th>
                                     <th class="py-4 px-6 font-semibold">DAERAH PENUGASAN</th>
-                                    <th class="py-4 px-6 font-semibold text-center">UBAH DAERAH</th>
+                                    <th class="py-4 px-6 font-semibold text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody class="text-sm divide-y divide-slate-100">
@@ -70,14 +87,23 @@
                                             @endif
                                         </td>
                                         <td class="py-4 px-6 text-center">
-                                            {{-- Tombol trigger modal --}}
-                                            <button
-                                                onclick="openModal({{ $user->id }}, '{{ $user->profile->name ?? $user->email }}', '{{ $user->profile?->lokasi ?? '' }}')"
-                                                class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                                Atur Daerah
-                                            </button>
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button
+                                                    onclick="openModal({{ $user->id }}, '{{ $user->profile->name ?? $user->email }}', '{{ $user->profile?->lokasi ?? '' }}')"
+                                                    class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                                                    title="Atur Daerah"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                    Atur Daerah
+                                                </button>
+                                                <form action="{{ route('pengguna.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');" class="inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shadow-sm" title="Hapus">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -112,6 +138,7 @@
                                     <th class="py-4 px-6 font-semibold">EMAIL</th>
                                     <th class="py-4 px-6 font-semibold">NIK</th>
                                     <th class="py-4 px-6 font-semibold">NO. TELP</th>
+                                    <th class="py-4 px-6 font-semibold text-center">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody class="text-sm divide-y divide-slate-100">
@@ -121,6 +148,15 @@
                                         <td class="py-4 px-6 text-slate-600">{{ $user->email }}</td>
                                         <td class="py-4 px-6 text-slate-500 text-xs font-mono">{{ $user->profile->Nik ?? '-' }}</td>
                                         <td class="py-4 px-6 text-slate-500">{{ $user->profile->no_telp ?? '-' }}</td>
+                                        <td class="py-4 px-6 text-center">
+                                            <form action="{{ route('pengguna.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shadow-sm" title="Hapus">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -172,6 +208,71 @@
         </div>
     </div>
 
+    {{-- ===== MODAL: Tambah Pengguna ===== --}}
+    <div id="modal-add-user" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto pt-10 pb-10">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden relative">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-5">
+                <h3 class="text-lg font-bold text-white">Tambah Pengguna Baru</h3>
+                <p class="text-emerald-100 text-sm mt-1">Lengkapi data pengguna di bawah ini</p>
+            </div>
+            <form id="form-add-user" method="POST" action="{{ route('pengguna.store') }}">
+                @csrf
+                <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Role Pengguna</label>
+                        <select name="role" id="add-role" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" required onchange="toggleLokasiField()">
+                            <option value="">-- Pilih Role --</option>
+                            <option value="admin_penanganan">Admin Penanganan</option>
+                            <option value="kepala_bagian">Kepala Bagian</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+                        <input type="text" name="name" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" required placeholder="Masukkan nama lengkap">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" name="email" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" required placeholder="contoh@dlhk.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                        <input type="password" name="password" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" required placeholder="Minimal 8 karakter" minlength="8">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">NIK (Opsional)</label>
+                        <input type="text" name="nik" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" placeholder="Masukkan NIK">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Telepon (Opsional)</label>
+                        <input type="text" name="no_telp" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" placeholder="Masukkan nomor telepon">
+                    </div>
+                    <div id="field-lokasi" class="hidden">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Daerah Penugasan</label>
+                        <select name="lokasi" id="add-lokasi" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                            <option value="">-- Pilih Daerah Penugasan --</option>
+                            <option value="bukit_raya">Bukit Raya</option>
+                            <option value="bina_widya">Bina Widya</option>
+                            <option value="marpoyan_damai">Marpoyan Damai</option>
+                            <option value="senapelan">Senapelan</option>
+                            <option value="rumbai">Rumbai</option>
+                        </select>
+                        <p class="mt-1 text-xs text-slate-500">
+                            Wajib dipilih jika role adalah Admin Penanganan.
+                        </p>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 flex gap-3 justify-end border-t border-slate-100">
+                    <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-sm">
+                        Simpan Pengguna
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const lokasiBases = {
             'bukit_raya': '{{ route("pengguna.updateLokasi", "__id__") }}'.replace('__id__', ''),
@@ -196,6 +297,40 @@
         document.getElementById('modal-lokasi').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
+
+        // Add Modal Functions
+        function openAddModal() {
+            const modal = document.getElementById('modal-add-user');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            toggleLokasiField(); // Initialize location field visibility
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('modal-add-user');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('form-add-user').reset();
+        }
+
+        document.getElementById('modal-add-user').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
+
+        function toggleLokasiField() {
+            const roleSelect = document.getElementById('add-role');
+            const lokasiField = document.getElementById('field-lokasi');
+            const lokasiSelect = document.getElementById('add-lokasi');
+            
+            if (roleSelect.value === 'admin_penanganan') {
+                lokasiField.classList.remove('hidden');
+                lokasiSelect.required = true;
+            } else {
+                lokasiField.classList.add('hidden');
+                lokasiSelect.required = false;
+                lokasiSelect.value = '';
+            }
+        }
     </script>
 
 </x-app-layout>

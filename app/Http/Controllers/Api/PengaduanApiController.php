@@ -73,7 +73,7 @@ class PengaduanApiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Pengaduan::with(['komentars.user:id,email'])->latest();
+        $query = Pengaduan::with(['komentars.user:id,email', 'penugasan.progres', 'penugasan.petugas'])->latest();
 
         // Implementasi Role Filtering
         if ($user->role == \App\Models\User::ROLE_KONSUMEN) {
@@ -150,6 +150,14 @@ class PengaduanApiController extends Controller
         $pengaduan->update([
             'status' => $request->status
         ]);
+
+        if ($request->status === Pengaduan::STATUS_SELESAI || $request->status === Pengaduan::STATUS_DITOLAK) {
+            if ($pengaduan->penugasan) {
+                $pengaduan->penugasan->update([
+                    'status_penugasan' => $request->status
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
