@@ -8,18 +8,28 @@ use App\Models\Pengaduan;
 class PengaduanController extends Controller
 {
     //untuk menampilkan semua pengaduan di view
-    public function index()
+    public function index(Request $request)
     {
         // STEP A: Ambil Data
-        // Pengaduan::latest() -> Artinya urutkan dari yang paling baru dibuat.
-        // ->get()             -> Eksekusi ambil datanya sekarang.
-        $pengaduans = Pengaduan::with('user.profile')->latest()->get();
+        $query = Pengaduan::with('user.profile')->latest();
+
+        // Filter berdasarkan lokasi/kawasan jika ada
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+
+        $pengaduans = $query->get();
+
+        $lokasis = [
+            'bukit_raya' => 'Bukit Raya',
+            'bina_widya' => 'Bina Widya',
+            'marpoyan_damai' => 'Marpoyan Damai',
+            'senapelan' => 'Senapelan',
+            'rumbai' => 'Rumbai'
+        ];
 
         // STEP B: Kirim ke Layar (View)
-        // view('pengaduan.index') -> Buka file di resources/views/pengaduan/index.blade.php
-        // compact('pengaduan')    -> Bawa variabel $pengaduan tadi ke sana biar bisa ditampilkan.
-
-        return view('pengaduan.index', compact('pengaduans'));
+        return view('pengaduan.index', compact('pengaduans', 'lokasis'));
     }
 
     public function show(Pengaduan $pengaduan)
@@ -37,12 +47,57 @@ class PengaduanController extends Controller
 
         $pengaduanTerbaru = Pengaduan::latest()->take(5)->get();
 
+        // Data untuk Grafik Kepala Bagian & Super Admin
+        $chartDataBulanan = null;
+        $chartDataMingguan = null;
+        
+        if (auth()->check() && in_array(auth()->user()->role, [\App\Models\User::ROLE_KEPALA_BAGIAN, \App\Models\User::ROLE_SUPER_ADMIN])) {
+            // --- Data Bulanan (Tahun Ini) ---
+            $pengaduanPerBulan = Pengaduan::selectRaw('MONTH(created_at) as bulan, COUNT(*) as jumlah')
+                ->whereYear('created_at', date('Y'))
+                ->groupBy('bulan')
+                ->orderBy('bulan')
+                ->get()
+                ->keyBy('bulan');
+
+            $labelsBulanan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            $dataBulanan = [];
+
+            for ($i = 1; $i <= 12; $i++) {
+                $dataBulanan[] = isset($pengaduanPerBulan[$i]) ? $pengaduanPerBulan[$i]->jumlah : 0;
+            }
+
+            $chartDataBulanan = [
+                'labels' => $labelsBulanan,
+                'data' => $dataBulanan,
+            ];
+
+            // --- Data Mingguan (Minggu Ini) ---
+            \Carbon\Carbon::setLocale('id'); // Bahasa Indonesia
+            $startOfWeek = \Carbon\Carbon::now()->startOfWeek();
+            $labelsMingguan = [];
+            $dataMingguan = [];
+            
+            for ($i = 0; $i < 7; $i++) {
+                $date = $startOfWeek->copy()->addDays($i);
+                $labelsMingguan[] = $date->isoFormat('dddd'); // Senin, Selasa, dll
+                $dataMingguan[] = Pengaduan::whereDate('created_at', $date->toDateString())->count();
+            }
+            
+            $chartDataMingguan = [
+                'labels' => $labelsMingguan,
+                'data' => $dataMingguan,
+            ];
+        }
+
         return view('dashboard', compact(
             'totalPengaduan',
             'hariIni',
             'diproses',
             'selesai',
-            'pengaduanTerbaru'
+            'pengaduanTerbaru',
+            'chartDataBulanan',
+            'chartDataMingguan'
         ));
     }
 

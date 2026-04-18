@@ -23,6 +23,7 @@ class AuthApiController extends Controller
             'alamat' => 'nullable|string|max:500',
         ]);
 
+
         try {
             $user = User::create([
                 'email' => $request->email,
@@ -43,9 +44,9 @@ class AuthApiController extends Controller
                 'success' => true,
                 'message' => 'Registrasi Berhasil',
                 'data' => [
-                    'user'  => $user->load('profile'),
+                    'user' => $user->load('profile'),
                     'token' => $token,
-                    'type'  => 'Bearer'
+                    'type' => 'Bearer'
                 ]
             ], 201);
         } catch (\Exception $e) {
@@ -74,23 +75,32 @@ class AuthApiController extends Controller
 
         try {
             $user = User::where('email', $request->email)->firstOrFail();
+
+            // Blokir super_admin dari login via API mobile
+            if ($user->role === User::ROLE_SUPER_ADMIN) {
+                // Batalkan sesi auth yang baru saja dibuat
+                Auth::logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akun Super Admin tidak dapat menggunakan aplikasi mobile.',
+                ], 403);
+            }
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
                 'message' => 'Login Berhasil',
                 'data' => [
-                    'user'  => $user,
+                    'user' => $user->load('profile'),
                     'token' => $token,
-                    'type'  => 'Bearer'
+                    'type' => 'Bearer'
                 ]
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Server Error: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -116,19 +126,19 @@ class AuthApiController extends Controller
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'name'       => 'nullable|string|max:255',
-            'no_telp'    => 'nullable|string|max:20',
-            'alamat'     => 'nullable|string|max:500',
-            'foto_profil'=> 'nullable|image|max:3000',
+            'name' => 'nullable|string|max:255',
+            'no_telp' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string|max:500',
+            'foto_profil' => 'nullable|image|max:3000',
         ]);
 
         $user = $request->user();
 
         try {
             $data = [
-                'name'    => $request->name,
+                'name' => $request->name,
                 'no_telp' => $request->no_telp,
-                'alamat'  => $request->alamat,
+                'alamat' => $request->alamat,
             ];
 
             // Upload foto jika ada
@@ -146,7 +156,7 @@ class AuthApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Profil berhasil diperbarui',
-                'data'    => $user->load('profile'),
+                'data' => $user->load('profile'),
             ], 200);
 
         } catch (\Exception $e) {

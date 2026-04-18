@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route Pengaduan (Protected)
     Route::post('/pengaduan', [PengaduanApiController::class, 'store']);
     Route::get('/pengaduan/all', [PengaduanApiController::class, 'all']); // Untuk Kepala Bagian
+    Route::get('/pengaduan/statistik', [PengaduanApiController::class, 'statistik']);
     Route::get('/pengaduan', [PengaduanApiController::class, 'index']);
     Route::get('/pengaduan/{id}', [PengaduanApiController::class, 'show']);
     Route::post('/pengaduan/{id}/komentar', [PengaduanApiController::class, 'storeKomentar']);

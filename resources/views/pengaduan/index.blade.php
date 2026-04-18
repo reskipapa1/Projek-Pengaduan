@@ -22,18 +22,38 @@
                 </div>
             @endif
 
-            @if(auth()->user()->role === \App\Models\User::ROLE_KEPALA_BAGIAN)
-                <div class="mb-6 flex flex-wrap gap-3">
-                    <a href="{{ route('pengaduan.exportPdfGlobal') }}" target="_blank" class="inline-flex items-center gap-2 bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-rose-700 shadow-sm transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        Export PDF Rekapitulasi
-                    </a>
-                    <a href="{{ route('pengaduan.exportExcel') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 shadow-sm transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        Export Excel Rekapitulasi
-                    </a>
-                </div>
-            @endif
+            <div class="mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <!-- Location Filter Form -->
+                <form action="{{ route('pengaduan.index') }}" method="GET" class="flex gap-2 w-full sm:w-auto">
+                    <select name="lokasi" class="bg-white border text-sm rounded-lg border-slate-300 focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:w-64 p-2.5 shadow-sm">
+                        <option value="">Semua Kawasan (Lokasi)</option>
+                        @foreach($lokasis as $key => $nama)
+                            <option value="{{ $key }}" {{ request('lokasi') == $key ? 'selected' : '' }}>{{ $nama }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm px-4 py-2.5 shadow-sm transition-colors">
+                        Filter
+                    </button>
+                    @if(request('lokasi'))
+                        <a href="{{ route('pengaduan.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg text-sm px-4 py-2.5 shadow-sm transition-colors flex items-center">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+
+                @if(auth()->user()->role === \App\Models\User::ROLE_KEPALA_BAGIAN)
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('pengaduan.exportPdfGlobal') }}" target="_blank" class="inline-flex items-center gap-2 bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-rose-700 shadow-sm transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Export PDF Rekapitulasi
+                        </a>
+                        <a href="{{ route('pengaduan.exportExcel') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 shadow-sm transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Export Excel Rekapitulasi
+                        </a>
+                    </div>
+                @endif
+            </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto">

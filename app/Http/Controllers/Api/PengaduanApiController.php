@@ -84,6 +84,11 @@ class PengaduanApiController extends Controller
             // Jika tidak, tampilkan semua laporan 
         }
 
+        // Filter berdasarkan Lokasi (Kawasan)
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+
         $pengaduans = $query->get();
 
         return response()->json([
@@ -177,7 +182,13 @@ class PengaduanApiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $pengaduans = Pengaduan::with(['user', 'penugasan.progres', 'penugasan.petugas', 'komentars.user:id,email'])->latest()->get();
+        $query = Pengaduan::with(['user', 'penugasan.progres', 'penugasan.petugas', 'komentars.user:id,email'])->latest();
+
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+
+        $pengaduans = $query->get();
 
         return response()->json([
             'success' => true,
@@ -228,5 +239,58 @@ class PengaduanApiController extends Controller
             'message' => 'Komentar berhasil ditambahkan',
             'data' => $komentar->load('user:id,name,email')
         ], 201);
+    }
+
+    /**
+     * Tampilkan Statistik Khusus untuk Kepala Bagian & Super Admin
+     */
+    public function statistik(Request $request)
+    {
+        $user = $request->user();
+        if (!in_array($user->role, [\App\Models\User::ROLE_KEPALA_BAGIAN, \App\Models\User::ROLE_SUPER_ADMIN])) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $now = \Carbon\Carbon::now();
+        
+        // --- Data Mingguan (Minggu Ini per Hari) ---
+        \Carbon\Carbon::setLocale('id'); // Bahasa Indonesia
+        $startOfWeek = clone $now;
+        $startOfWeek->startOfWeek();
+        
+        $weeklyData = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = clone $startOfWeek;
+            $date->addDays($i);
+            
+            $count = Pengaduan::whereDate('created_at', $date->toDateString())->count();
+            $weeklyData[] = [
+                'periode' => $date->isoFormat('dddd'), // Senin, Selasa, dll
+                'label' => $date->format('d M y'),
+                'count' => $count
+            ];
+        }
+
+        // --- Data Bulanan (Tahun Ini) ---
+        $monthlyData = [];
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        for ($i = 1; $i <= 12; $i++) {
+            $count = Pengaduan::whereYear('created_at', $now->year)
+                ->whereMonth('created_at', $i)
+                ->count();
+            $monthlyData[] = [
+                'periode' => $months[$i - 1],
+                'count' => $count
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Statistik Pengaduan',
+            'data' => [
+                'mingguan' => $weeklyData,
+                'bulanan' => $monthlyData,
+            ]
+        ], 200);
     }
 }

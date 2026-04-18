@@ -23,10 +23,17 @@ class PenugasanApiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $penugasans = Penugasan::with(['pengaduan', 'progres'])
+        $query = Penugasan::with(['pengaduan', 'progres'])
             ->where('petugas_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->get();
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('lokasi')) {
+            $query->whereHas('pengaduan', function($q) use ($request) {
+                $q->where('lokasi', $request->lokasi);
+            });
+        }
+
+        $penugasans = $query->get();
 
         return response()->json([
             'success' => true,
